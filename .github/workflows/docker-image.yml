@@ -15,4 +15,4 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build . --file ./example/Dockerfile --tag home-assistant-addons:$(date +%s)
+      run: docker build . --file ./example/Dockerfile --build-arg BUILD_FROM=ubuntu:latest --tag home-assistant-addons:$(date +%s)
