@@ -1,0 +1,22 @@
+- id: 1
+  username: Marco
+  available_daily_effort:
+    mon: 4
+    tue: 3
+    wed: 2
+    thu: 5
+    fri: 2
+    sat: 4
+    sun: 4
+
+- id: 2
+  username: Mayra
+  available_daily_effort:
+    mon: 4
+    tue: 4
+    wed: 4
+    thr: 4
+    thu: 4
+    fri: 2
+    sat: 4
+    sun: 4
