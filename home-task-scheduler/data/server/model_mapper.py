@@ -8,4 +8,4 @@ def scheduledTask_to_model(domain: ScheduledTask):
             scheduled_date=domain.scheduled_date,
             status=domain.status,
             user_id=domain.user_id
-        )
+        ).to_dict()

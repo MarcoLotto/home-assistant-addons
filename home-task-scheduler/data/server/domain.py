@@ -1,22 +1,32 @@
-from sqlalchemy import create_engine, Column, Integer, Date, Enum as SQLAEnum
-from sqlalchemy.ext.declarative import declarative_base
 from enum import Enum
-
-Base = declarative_base()
+from datetime import date
 
 class TaskStatus(Enum):
     PENDING = "pending"
     COMPLETED = "completed"
     INCOMPLETE = "incomplete"
 
-class ScheduledTask(Base):
+    def to_string(self):
+        return self.value
+
+class ScheduledTask():
     __tablename__ = "scheduled_tasks"
     
-    scheduled_task_id = Column(Integer, primary_key=True, index=True)
-    task_id = Column(Integer)
-    user_id = Column(Integer)
-    scheduled_date = Column(Date)
-    status = Column(SQLAEnum(TaskStatus), default=TaskStatus.PENDING)
+    scheduled_task_id: int
+    task_id: int
+    user_id: int
+    scheduled_date: date
+    status: TaskStatus
+
+    def __init__(self, scheduled_task_id, task_id, user_id, scheduled_date, status):
+        self.scheduled_task_id = scheduled_task_id
+        self.task_id=task_id
+        self.user_id=user_id
+        self.scheduled_date = scheduled_date
+        self.status = status
+
+    def to_tuple(self):
+        return [self.task_id, self.user_id, self.scheduled_date, self.status.to_string()]
 
 class Task():
     task_id: int
@@ -49,8 +59,3 @@ class Notification():
     def __init__(self, notification_available, notification_message):
         self.notification_available = notification_available
         self.notification_message = notification_message
-
-# Crear la base de datos (SQLite en este caso)
-DATABASE_URL = "sqlite:///./database.db"
-engine = create_engine(DATABASE_URL)
-Base.metadata.create_all(bind=engine)
