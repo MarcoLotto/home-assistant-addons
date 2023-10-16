@@ -12,5 +12,6 @@ COPY rootfs /
 
 # Install pip dependencies
 RUN pip3 install --no-cache-dir -r /usr/bin/server/requirements.txt
+RUN chmod a+x /usr/bin/run.sh
 
 EXPOSE 8000
