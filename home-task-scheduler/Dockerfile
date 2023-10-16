@@ -7,15 +7,10 @@ RUN \
     python3 \
     py3-pip
 
-WORKDIR /data
+# Copy root filesystem
+COPY rootfs /
 
-# Copy data for add-on
-COPY /data/run.sh /
-COPY data/ /data/
+# Install pip dependencies
+RUN pip3 install --no-cache-dir -r /usr/bin/server/requirements.txt
 
-# Install Python dependencies
-RUN pip3 install --no-cache-dir -r /data/server/requirements.txt
-
-RUN chmod a+x /run.sh
-
-CMD [ "./run.sh" ]
+EXPOSE 8000
