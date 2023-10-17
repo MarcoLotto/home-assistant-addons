@@ -4,7 +4,7 @@ import shutil
 from domain import User, Task
 
 BASE_TARGET_PATH = "/config/home-task-scheduler/"
-ABS_SOURCE_PATH = "/usr/bin/server/"
+ABS_SOURCE_PATH = "/usr/bin/server/initial_config/"
 REL_SOURCE_PATH = "./initial_config/"
 TASKS_CONFIG_FILENAME = "tasks.yaml"
 USERS_CONFIG_FILENAME = "users.yaml"
