@@ -2,4 +2,4 @@
 
 echo "Starting server.."
 
-python3 server/controller.py
+python3 /usr/bin/server/controller.py
