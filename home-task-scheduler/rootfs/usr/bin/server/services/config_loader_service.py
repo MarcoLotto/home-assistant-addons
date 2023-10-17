@@ -1,8 +1,8 @@
 import yaml
 from domain import User, Task
 
-TASKS_FILENAME = "server/tasks.yaml"
-USERS_FILENAME = "server/users.yaml"
+TASKS_FILENAME = "./tasks.yaml"
+USERS_FILENAME = "./users.yaml"
 
 def get_task_allowed_days(task: dict):
     if "allowed_days" in task:
