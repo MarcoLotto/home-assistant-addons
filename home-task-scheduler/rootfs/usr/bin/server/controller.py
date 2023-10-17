@@ -1,5 +1,5 @@
 from bottle import Bottle, route, run, request, response, HTTPError
-from services.config_loader_service import load_tasks_from_yaml
+from services.config_loader_service import load_tasks_from_yaml, create_config_dir
 from domain import TaskStatus
 from model_mapper import scheduledTask_to_model
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -18,7 +18,9 @@ def start_scheduler():
     scheduler.add_job(generate_daily_tasks, trigger="cron", hour=6)
     scheduler.start()
 
-start_scheduler()  # Call on module import
+# Call on module import
+create_config_dir()
+start_scheduler()
 
 @app.route("/tasks")
 def get_all_tasks():

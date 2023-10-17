@@ -15,7 +15,6 @@ def dict_factory(cursor, row):
     task_dict = {col[0]: row[idx] for idx, col in enumerate(cursor.description)}
     scheduled_date = date.fromisoformat(task_dict["scheduled_date"])
     status = TaskStatus[task_dict["status"].upper()]
-    print("QUERY RESULT: " + str(task_dict))
     return ScheduledTask(scheduled_task_id=task_dict["scheduled_task_id"], task_id=task_dict["task_id"], user_id=task_dict["user_id"], scheduled_date=scheduled_date, status=status)
 
 def get_tasks_for_user_from_repo(con: Connection, user_id: str, task_status: TaskStatus):
@@ -69,8 +68,6 @@ def _execute_scheduled_tasks_query_with_subquery(query_clause: str, con: Connect
             final_param = final_param.isoformat() # Convert date to string format (SQLite doesn't have a date type)
         params.append(final_param)
     query += subquery_query
-
-    print("QUERY PARAMS: " + str(params))
     cursor.execute(query, params)
     return cursor
 
