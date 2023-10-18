@@ -2,7 +2,7 @@ from services.config_loader_service import load_tasks_from_yaml
 from domain import ScheduledTask, TaskStatus, User
 from services.users_service import list_users
 from repositories.database_client import open_db_session
-from repositories.scheduled_task_repository import insert_scheduled_task_from_repo, get_scheduled_tasks_from_repo, delete_non_completed_scheduled_tasks_from_repo, get_last_completed_task_from_repo, get_past_previous_tasks_from_repo
+from repositories.scheduled_task_repository import insert_scheduled_task_from_repo, get_scheduled_tasks_from_repo, delete_non_completed_scheduled_tasks_from_repo, get_last_completed_task_from_repo, update_past_scheduled_tasks_status_from_repo
 from datetime import date
 import random
 import logging
@@ -26,7 +26,7 @@ def _get_user_to_assign(task, users, used_effort_by_user: dict, date) -> User:
 def _schedule_task_for_today(task, today, todays_scheduled_task_ids, con, user):
     """Schedule a task for today if it meets the interval criteria. Skip if already scheduled"""
     if task.task_id in todays_scheduled_task_ids:
-        logger.info(f"Task '{task.name}' is already scheduled for today.")
+        logger.info(f"Task '{task.name}' is already scheduled for today - Effort: {task.effort}")
         return False
     
     day_of_week = DAY_LOOKUP[today.weekday()]
@@ -38,17 +38,14 @@ def _schedule_task_for_today(task, today, todays_scheduled_task_ids, con, user):
     if not last_scheduled or (today - last_scheduled.scheduled_date).days >= task.days_interval:
         new_scheduled_task = ScheduledTask(None, task_id=task.task_id,  user_id=user.id, scheduled_date=today, status=TaskStatus.PENDING)
         insert_scheduled_task_from_repo(con, new_scheduled_task)
-        logger.info(f"Task '{task.name}' assigned to {user.username}")
+        logger.info(f"Task '{task.name}' assigned to {user.username} - Effort: {task.effort}")
         return True
-    logger.info(f"Task '{task.name}' is not assigned as it has been scheduled recently")
+    logger.debug(f"Task '{task.name}' is not assigned as it has been scheduled recently")
     return False
 
 def _mark_as_incompleted_previous_days_pending_tasks(today, con):
-    pending_tasks = get_past_previous_tasks_from_repo(con, today)
-    for pending_task in pending_tasks:  
-            pending_task.status = TaskStatus.INCOMPLETE
-            # db.add(pending_task)  TODO
-            logger.info(f"Marked previous task {pending_task.task_id} as {TaskStatus.INCOMPLETE}.")
+    update_past_scheduled_tasks_status_from_repo(con, TaskStatus.PENDING, today, TaskStatus.INCOMPLETE)
+    logger.info(f"Marked previous pending tasks as {TaskStatus.INCOMPLETE.value}.")
 
 def _delete_pending_tasks_on_date(date, con):
     delete_non_completed_scheduled_tasks_from_repo(con, date)
@@ -70,6 +67,11 @@ def _assign_mandatory_tasks(tasks, date, users, todays_scheduled_task_ids, con):
             current_user_index = 0
     return mandatory_task_ids_assigned
 
+def _log_user_available_efforts(today, users):
+    for user in users:
+        available_effort = _get_remaining_user_effort(today, user, 0)
+        logger.info(f"User {user.username} has today an available effort of {str(available_effort)}")
+
 def generate_daily_tasks():
     today = date.today()
     logger.info(f"Running task scheduler on {DAY_LOOKUP[today.weekday()]} {str(today)}")
@@ -77,6 +79,7 @@ def generate_daily_tasks():
     random.shuffle(tasks)
     users = list_users()
     used_effort_by_user = {user.id: 0 for user in users}
+    _log_user_available_efforts(today, users)
 
     with open_db_session() as con:
         _delete_pending_tasks_on_date(today, con) # Pending tasks today are being deleted to avoid issues while re-running
@@ -87,6 +90,7 @@ def generate_daily_tasks():
         mandatory_task_ids_assigned = _assign_mandatory_tasks(tasks, today, users, todays_scheduled_task_ids, con)
 
         # Then the time-consuming tasks
+        unasigned_effort = 0
         for task in tasks:
             if task.task_id in mandatory_task_ids_assigned:
                 continue
@@ -95,7 +99,11 @@ def generate_daily_tasks():
                 if _schedule_task_for_today(task, today, todays_scheduled_task_ids, con, user):
                     used_effort_by_user[user.id] = used_effort_by_user[user.id] + task.effort
             else:
-                logger.warn(f"Task {task.name} cannot be scheduled as there is not effort remaining")
+                unasigned_effort += task.effort
+                logger.debug(f"Task {task.name} cannot be scheduled as there is not effort remaining")
+
+        if unasigned_effort > 0:
+            logger.warn(f"There are a total of {unasigned_effort} effort points not assigned as there is not enough capacity")
 
         con.commit()
     logger.info(f"Task scheduler finished")

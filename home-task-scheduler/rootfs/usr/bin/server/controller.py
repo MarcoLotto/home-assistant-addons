@@ -7,7 +7,7 @@ from datetime import date
 from services.notifications_service import get_notification_message
 from services.generate_tasks_service import generate_daily_tasks
 from waitress import serve
-from repositories.scheduled_task_repository import get_tasks_for_user_from_repo, get_scheduled_task_from_repo, update_scheduled_task_status_from_repo, get_today_scheduled_tasks_by_status_from_repo
+from repositories.scheduled_task_repository import get_tasks_for_user_from_repo, get_scheduled_task_from_repo, update_scheduled_task_status_from_repo, get_today_scheduled_tasks_by_status_from_repo, update_tasks_status_for_user_from_repo
 from repositories.database_client import open_db_session
 
 app = Bottle()
@@ -55,26 +55,30 @@ def read_scheduled_task(scheduled_task_id):
         return HTTPError(404, "Scheduled task not found")
     return scheduledTask_to_model(scheduled_task)
 
+def get_task_status_from_request_payload(request):
+    data = request.json
+    if 'status' not in data:
+        raise HTTPError(400, "Status is required on payload")
+    if data['status'] not in (item.value for item in TaskStatus):
+        raise HTTPError(400, "The value is not a valid TaskStatus")
+    input_status = data['status'].upper()
+    return TaskStatus[input_status]
+
 @app.route("/scheduled-tasks/<scheduled_task_id:int>", method="PUT")
 def update_scheduled_task_status(scheduled_task_id):
+    input_status = get_task_status_from_request_payload(request)
     with open_db_session() as con:
-        scheduled_task = get_scheduled_task_from_repo(scheduled_task_id)
-        if not scheduled_task:
-            return HTTPError(404, "Scheduled task not found")
-        data = request.json
-        update_scheduled_task_status_from_repo(scheduled_task_id, data['status'])
+        update_scheduled_task_status_from_repo(con, scheduled_task_id, input_status)
         con.commit()
-    return scheduledTask_to_model(scheduled_task)
+    return {"result": "ok"}
 
 @app.route("/users/<user_id:int>/pending-tasks", method="PUT")
 def update_user_pending_tasks(user_id):
-    data = request.json
+    input_status = get_task_status_from_request_payload(request)
     with open_db_session() as con:
-        scheduled_tasks = get_tasks_for_user_from_repo(con, user_id, TaskStatus.PENDING)
-        for scheduled_task in scheduled_tasks:
-            update_scheduled_task_status_from_repo(con, scheduled_task["scheduled_task_id"], data['status'])
+        update_tasks_status_for_user_from_repo(con, user_id, TaskStatus.PENDING, input_status)
         con.commit()
-        return {"pending_tasks": [scheduledTask_to_model(task) for task in scheduled_tasks]}
+    return {"result": "ok"}
 
 @app.route("/users/<user_id:int>/pending-tasks")
 def get_user_pending_tasks(user_id):

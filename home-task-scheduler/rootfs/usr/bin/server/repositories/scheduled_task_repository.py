@@ -17,24 +17,6 @@ def dict_factory(cursor, row):
     status = TaskStatus[task_dict["status"].upper()]
     return ScheduledTask(scheduled_task_id=task_dict["scheduled_task_id"], task_id=task_dict["task_id"], user_id=task_dict["user_id"], scheduled_date=scheduled_date, status=status)
 
-def get_tasks_for_user_from_repo(con: Connection, user_id: str, task_status: TaskStatus):
-    con.row_factory = dict_factory
-    cursor = con.cursor()
-    cursor.execute("SELECT * FROM scheduled_tasks WHERE user_id=? AND status=?", (user_id, task_status.to_string()))
-    tasks = cursor.fetchall()
-    return tasks
-
-def get_scheduled_task_from_repo(con: Connection, scheduled_task_id: int):
-    con.row_factory = dict_factory
-    cursor = con.cursor()
-
-    # Check if scheduled_task exists
-    cursor.execute("SELECT * FROM scheduled_tasks WHERE id=?", (scheduled_task_id,))
-    scheduled_task = cursor.fetchone()
-    if not scheduled_task:
-        return None
-    return dict_factory(scheduled_task)
-
 def update_scheduled_task_status_from_repo(con: Connection, scheduled_task_id: int, task_status: str):
     cursor = con.cursor()
     cursor.execute("UPDATE scheduled_tasks SET status=? WHERE id=?", (task_status, scheduled_task_id))
@@ -83,15 +65,37 @@ def get_scheduled_tasks_from_repo(con: Connection, status: str, user_id: int, da
     cursor = _execute_scheduled_tasks_query("SELECT *", con, query_attributes)
     return cursor.fetchall()
 
+def update_tasks_status_for_user_from_repo(con: Connection, user_id: int, from_status: TaskStatus, to_status: TaskStatus):
+    cursor = con.cursor()
+    query = "UPDATE scheduled_tasks SET status=? WHERE user_id=? AND status=?"
+    params = [to_status.value, user_id, from_status.value]
+    cursor.execute(query, params)
+
+def update_past_scheduled_tasks_status_from_repo(con: Connection, from_status: TaskStatus, date: date, to_status: TaskStatus):
+    cursor = con.cursor()
+    query = "UPDATE scheduled_tasks SET status=? WHERE scheduled_date<? AND status=?"
+    params = [to_status.value, date.isoformat(), from_status.value]
+    cursor.execute(query, params)
+
+def update_scheduled_task_status_from_repo(con: Connection, scheduled_task_id: int, to_status: TaskStatus):
+    cursor = con.cursor()
+    query = "UPDATE scheduled_tasks SET status=? WHERE scheduled_task_id=?"
+    params = [to_status.value, scheduled_task_id]
+    cursor.execute(query, params)
+
 def delete_non_completed_scheduled_tasks_from_repo(con: Connection, date: date):
     _execute_scheduled_tasks_query("DELETE", con, [QueryAttribute("status", "!=", TaskStatus.COMPLETED.value), QueryAttribute("scheduled_date", "=", date)])
 
 def get_last_completed_task_from_repo(con: Connection, task_id: int, status: TaskStatus):
     order_query = " ORDER BY scheduled_date DESC"
     cursor = _execute_scheduled_tasks_query_with_subquery("SELECT *", con, [QueryAttribute("task_id", "=", task_id), QueryAttribute("status", "=", status.value)], order_query)
+    return cursor.fetchone()
+
+def get_tasks_for_user_from_repo(con: Connection, user_id: str, task_status: TaskStatus):
+    cursor = _execute_scheduled_tasks_query("SELECT *", con, [QueryAttribute("user_id", "=", user_id), QueryAttribute("status", "=", task_status.value)])
     return cursor.fetchall()
 
-def get_past_previous_tasks_from_repo(con: Connection, date: date):
-    cursor = _execute_scheduled_tasks_query("SELECT *", con, [QueryAttribute("scheduled_date", "<", date), QueryAttribute("status", "=", TaskStatus.PENDING.value)])
-    return cursor.fetchall()
+def get_scheduled_task_from_repo(con: Connection, scheduled_task_id: int):
+    cursor = _execute_scheduled_tasks_query("SELECT *", con, [QueryAttribute("scheduled_task_id", "=", scheduled_task_id)])
+    return cursor.fetchone()
 
