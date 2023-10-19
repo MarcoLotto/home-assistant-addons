@@ -17,3 +17,18 @@ class ScheduledTaskModel():
             "user_id": self.user_id,
             "status": self.status.to_string()
         }
+    
+class TaskModel():
+    def __init__(self, task_id: int, name: str, days_interval: int, effort: int):
+        self.task_id = task_id
+        self.name = name
+        self.days_interval = days_interval
+        self.effort = effort
+    
+    def to_dict(self):
+        return {
+            "task_id": self.task_id,
+            "name": self.name,
+            "days_interval": self.days_interval,
+            "effort": self.effort
+        }

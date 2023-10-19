@@ -1,7 +1,8 @@
 import sqlite3
+from common import BASE_TARGET_PATH
 
 # Create a new SQLite database and set up tables
-DATABASE_NAME = 'database.db'
+DATABASE_NAME = BASE_TARGET_PATH + 'database.db'
 
 def init_db():
     with sqlite3.connect(DATABASE_NAME) as con:
