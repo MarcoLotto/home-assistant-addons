@@ -1,55 +1,25 @@
 - id: 1
-  name: Limpieza basica de cocina
+  name: Clean the kitchen
+  days_interval: 3
+  effort: 1
+
+- id: 2
+  name: Clean the bathroom
   days_interval: 3
   effort: 1
 
 - id: 3
-  name: Limpieza basica de toilette
+  name: Clean the bedroom
   days_interval: 3
   effort: 1
 
 - id: 4
-  name: Limpieza basica de dormitorio
+  name: Clean the living room
   days_interval: 3
   effort: 1
 
 - id: 5
-  name: Limpieza basica de piecita
-  days_interval: 3
-  effort: 1
-
-- id: 6
-  name: Limpieza basica del estudio
-  days_interval: 3
-  effort: 1
-
-- id: 7
-  name: Limpieza basica del living
-  days_interval: 3
-  effort: 1
-
-- id: 8
-  name: Limpieza basica del patio
-  days_interval: 7
-  effort: 1
-
-- id: 9
-  name: Cambiar sábanas en las habitaciones
-  days_interval: 14
-  effort: 2
-
-- id: 10
-  name: Limpiar ventanas de toda la casa
-  days_interval: 45
-  effort: 3
-
-- id: 11
-  name: Limpiar y organizar la heladera
-  days_interval: 45
-  effort: 3
-
-- id: 13
-  name: Sacar la basura
+  name: Take out trash
   days_interval: 2
   effort: 0
   allowed_days:
@@ -60,77 +30,20 @@
     - fri
     - sun
 
-- id: 14
-  name: Sacar el agua
+- id: 6
+  name: Replace water tank
   days_interval: 7
   effort: 0
   allowed_days:
     - wed
     - sun
 
-- id: 15
-  name: Limpiar el horno
-  days_interval: 30
-  effort: 2
-
-- id: 16
-  name: Limpiar y organizar armarios y cajones
-  days_interval: 30
-  effort: 4
-
-- id: 17
-  name: Lavar ropa
+- id: 7
+  name: Do laundry
   days_interval: 3
   effort: 2
 
-- id: 19
-  name: Desinfectar tacho de basura
-  days_interval: 30
-  effort: 2
-
-- id: 20
-  name: Regar plantas
+- id: 8
+  name: Water plants
   days_interval: 3
   effort: 0
-
-- id: 21
-  name: Limpieza a fondo de cocina
-  days_interval: 10
-  effort: 3
-
-- id: 22
-  name: Limpieza a fondo de toilette
-  days_interval: 10
-  effort: 4
-
-- id: 23
-  name: Limpieza a fondo de dormitorio
-  days_interval: 10
-  effort: 2
-
-- id: 24
-  name: Limpieza a fondo de estudio
-  days_interval: 10
-  effort: 2
-
-- id: 25
-  name: Limpieza a fondo de living
-  days_interval: 10
-  effort: 3
-
-- id: 26
-  name: Limpiar popo de Lenka
-  days_interval: 7
-  effort: 2
-
-- id: 27
-  name: Aspirar la casa
-  days_interval: 7
-  effort: 3
-
-- id: 28
-  name: Sacar reciclables
-  days_interval: 7
-  effort: 0
-  allowed_days:
-    - thu

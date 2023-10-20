@@ -47,8 +47,9 @@ def read_scheduled_tasks_for_today():
 
 @app.route("/notifications/scheduled-tasks")
 def get_notification_for_scheduled_tasks():
+    language = request.query.get("language")
     with open_db_session() as con:
-        notification = notificationService.get_notification_message(con)
+        notification = notificationService.get_notification_message(con, language)
     return {"notification_available": notification.notification_available, "notification_message": notification.notification_message}
 
 @app.route("/scheduled-tasks/<scheduled_task_id:int>")
