@@ -7,7 +7,7 @@ from services.notifications_service import NotificationService
 from services.generate_tasks_service import GenerateTasksService
 from waitress import serve
 from repositories.scheduled_task_repository import ScheduledTaskRepository
-from repositories.database_client import open_db_session
+from repositories.database_client import open_db_session, init_db
 
 app = Bottle()
 scheduler = BackgroundScheduler()
@@ -16,14 +16,15 @@ generateTasksService = GenerateTasksService()
 notificationService = NotificationService()
 configLoaderService = ConfigLoaderService()
 
-def start_scheduler():
+def on_start():
+    # Create the config dirs and init the database
+    configLoaderService.create_config_dir()
+    init_db()
+    
+    # Generate the daily tasks and schedule it for a fixed time
     generateTasksService.generate_daily_tasks()
     scheduler.add_job(generateTasksService.generate_daily_tasks, trigger="cron", hour=6)
     scheduler.start()
-
-# Call on module import
-configLoaderService.create_config_dir()
-start_scheduler()
 
 @app.route("/tasks")
 def get_all_tasks():
@@ -97,4 +98,5 @@ def generate_tasks_endpoint():
     return {"result": "ok"}
 
 if __name__ == "__main__":
+    on_start()
     serve(app, host="0.0.0.0", port=8000)

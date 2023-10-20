@@ -18,5 +18,3 @@ def init_db():
 
 def open_db_session():
     return sqlite3.connect(DATABASE_NAME)
-
-init_db()  # This will set up the database and table on import

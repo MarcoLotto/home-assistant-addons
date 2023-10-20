@@ -15,7 +15,7 @@ USERS_CONFIG_PATH = BASE_TARGET_PATH + USERS_CONFIG_FILENAME
 class ConfigLoaderService:
 
     def load_tasks_from_yaml(self, file_path=TASKS_CONFIG_PATH) -> list[Task]:
-        with open(file_path, "r") as file:
+        with open(file_path, "r", encoding='utf-8') as file:
             tasks = yaml.safe_load(file)
         return [Task(task["id"], task["name"], task["days_interval"], task["effort"], self.get_task_allowed_days(task)) for task in tasks]
 
@@ -30,7 +30,7 @@ class ConfigLoaderService:
         return id_dictionary
 
     def load_users_from_yaml(self, file_path=USERS_CONFIG_PATH) -> list[User]:
-        with open(file_path, "r") as file:
+        with open(file_path, "r", encoding='utf-8') as file:
             users_data = yaml.safe_load(file)
         return [User(user["id"], user["username"], user["available_daily_effort"]) for user in users_data]
 

@@ -1,6 +1,6 @@
 name: "Home Task Scheduler"
 description: "Home Assistant Addon to schedule Home Tasks"
-version: "1.0.13"
+version: "1.0.14"
 slug: "home-task-scheduler"
 init: false
 arch:
