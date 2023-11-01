@@ -1,6 +1,7 @@
 # Home Assistant Add-on: Home Task Scheduler
 
 The Home Task Scheduler add-on allows you to schedule daily household tasks and evenly distribute them among the house members.
+It is a lightweight add-on which can be run on small devices (like a Raspberry Pi 3 running Home Assistant OS). The server has been built using a small number of dependencies and technologies that work well for lightweight and small servers.
 
 ## Tasks and Users Configuration
 
