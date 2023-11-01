@@ -34,9 +34,9 @@ class ScheduledTaskRepository:
     def delete_non_completed_scheduled_tasks(self, con: Connection, date: date):
         self._execute_scheduled_tasks_query("DELETE", con, [QueryAttribute("status", "!=", TaskStatus.COMPLETED.value), QueryAttribute("scheduled_date", "=", date)])
 
-    def get_last_completed_task(self, con: Connection, task_id: int, status: TaskStatus):
+    def get_last_scheduled_task(self, con: Connection, task_id: int):
         order_query = " ORDER BY scheduled_date DESC"
-        cursor = self._execute_scheduled_tasks_query_with_subquery("SELECT *", con, [QueryAttribute("task_id", "=", task_id), QueryAttribute("status", "=", status.value)], order_query)
+        cursor = self._execute_scheduled_tasks_query_with_subquery("SELECT *", con, [QueryAttribute("task_id", "=", task_id)], order_query)
         return cursor.fetchone()
 
     def get_tasks_for_user(self, con: Connection, user_id: str, task_status: TaskStatus):

@@ -76,7 +76,7 @@ class GenerateTasksService:
             logger.debug(f"Task '{task.name}' is not available today ({day_of_week}) - allowed days {str(task.allowed_days)}")
             return False
         
-        last_scheduled = scheduledTaskRepository.get_last_completed_task(con, task.task_id, TaskStatus.COMPLETED)
+        last_scheduled = scheduledTaskRepository.get_last_scheduled_task(con, task.task_id)
         if not last_scheduled or (today - last_scheduled.scheduled_date).days >= task.days_interval:
             new_scheduled_task = ScheduledTask(None, task_id=task.task_id,  user_id=user.id, scheduled_date=today, status=TaskStatus.PENDING)
             scheduledTaskRepository.insert_scheduled_task(con, new_scheduled_task)
